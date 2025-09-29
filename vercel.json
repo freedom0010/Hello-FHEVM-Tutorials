@@ -1,6 +1,3 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "out",
-  "trailingSlash": false,
-  "cleanUrls": true
+  "framework": "nextjs"
 }

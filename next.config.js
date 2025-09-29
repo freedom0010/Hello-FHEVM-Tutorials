@@ -3,8 +3,8 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   
-  // Static export configuration
-  output: 'export',
+  // Static export configuration (disabled for Vercel)
+  // output: 'export',
   trailingSlash: true,
   images: {
     unoptimized: true
