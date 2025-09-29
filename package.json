@@ -8,14 +8,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "export": "next export"
+    "export": "next build && next export",
+    "deploy": "npm run export && gh-pages -d out"
   },
   "keywords": [
     "fhevm",
     "blockchain",
     "privacy",
     "tutorial",
-    "solidity"
+    "solidity",
+    "homomorphic-encryption",
+    "smart-contracts"
   ],
   "author": "FHEVM Tutorial Team",
   "license": "MIT",
@@ -30,14 +33,24 @@
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
+    "@tailwindcss/typography": "^0.5.10",
     "@types/node": "^20.19.17",
     "@types/react": "^18.3.24",
-    "@types/react-dom": "^18.0.0",
+    "@types/react-dom": "^18.3.7",
     "autoprefixer": "^10.4.21",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/Hello-FHEVM-Tutorials.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/Hello-FHEVM-Tutorials/issues"
+  },
+  "homepage": "https://your-username.github.io/Hello-FHEVM-Tutorials"
 }

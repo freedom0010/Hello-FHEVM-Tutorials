@@ -3,99 +3,18 @@ import path from "path";
 import { GetStaticPaths, GetStaticProps } from "next";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import Head from "next/head";
 import Link from "next/link";
-import React, { useState } from "react";
+import React from "react";
+import Layout from "../../components/Layout";
+import CopyButton from "../../components/CopyButton";
+import InteractiveButton from "../../components/InteractiveButton";
 
 interface CourseProps {
   content: string;
   slug: string;
 }
 
-// 内联 CopyButton 组件
-const CopyButton: React.FC<{ text: string }> = ({ text }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  };
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors z-10"
-      aria-label="Copy code"
-    >
-      {copied ? '已复制!' : '复制'}
-    </button>
-  );
-};
-
-// 内联 Layout 组件
-const Layout: React.FC<{ children: React.ReactNode; title?: string }> = ({ 
-  children, 
-  title = 'FHEVM Tutorials' 
-}) => {
-  return (
-    <>
-      <Head>
-        <title>{title}</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link
-          href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-          rel="stylesheet"
-        />
-      </Head>
-
-      <div className="min-h-screen bg-gray-50">
-        {/* Navigation Header */}
-        <header className="bg-white shadow-sm border-b">
-          <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <Link href="/" className="text-xl font-bold text-indigo-600">
-                FHEVM Tutorials
-              </Link>
-              <div className="flex space-x-4">
-                <Link 
-                  href="/courses/01-introduction" 
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  开始学习
-                </Link>
-                <Link 
-                  href="/" 
-                  className="text-gray-600 hover:text-gray-900"
-                >
-                  首页
-                </Link>
-              </div>
-            </div>
-          </nav>
-        </header>
-
-        {/* Main Content */}
-        <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-          {children}
-        </main>
-
-        {/* Footer */}
-        <footer className="bg-gray-100 mt-16">
-          <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-gray-600">
-            <p>&copy; 2024 FHEVM Tutorials. 学习隐私计算的最佳选择。</p>
-          </div>
-        </footer>
-      </div>
-    </>
-  );
-};
-
-// 定义代码组件的属性类型
+// Define code component props type
 interface CodeComponentProps {
   node?: any;
   inline?: boolean;
@@ -105,66 +24,172 @@ interface CodeComponentProps {
 }
 
 export default function CoursePage({ content, slug }: CourseProps) {
+  // Course navigation data
+  const courseList = [
+    '01-introduction',
+    '02-environment-setup', 
+    '03-writing-contract',
+    '04-deploy-contract',
+    '05-encryption-decryption',
+    '06-frontend',
+    '07-conclusion'
+  ];
+
+  const currentIndex = courseList.indexOf(slug);
+  const prevCourse = currentIndex > 0 ? courseList[currentIndex - 1] : null;
+  const nextCourse = currentIndex < courseList.length - 1 ? courseList[currentIndex + 1] : null;
+
   return (
-    <Layout title={`课程: ${slug} - FHEVM Tutorials`}>
-      <div className="bg-white rounded-lg shadow-sm p-8">
-        <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-indigo-600 prose-strong:text-gray-900 prose-code:text-pink-600 prose-code:bg-pink-50">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              code: ({ node, inline, className, children, ...props }: CodeComponentProps) => {
-                if (!inline) {
-                  return (
-                    <div className="relative my-4">
-                      <CopyButton text={String(children)} />
-                      <pre className="bg-gray-900 text-white p-4 rounded-lg overflow-x-auto">
-                        <code className="text-sm">{children}</code>
-                      </pre>
-                    </div>
-                  );
-                }
-                return (
-                  <code className="bg-pink-50 text-pink-600 px-1 py-0.5 rounded text-sm font-mono">
-                    {children}
-                  </code>
-                );
-              },
-              h1: ({ children }) => (
-                <h1 className="text-3xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-2">
-                  {children}
-                </h1>
-              ),
-              h2: ({ children }) => (
-                <h2 className="text-2xl font-semibold text-gray-800 mt-8 mb-4">
-                  {children}
-                </h2>
-              ),
-              h3: ({ children }) => (
-                <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">
-                  {children}
-                </h3>
-              ),
-              blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-indigo-500 bg-indigo-50 p-4 my-4 italic">
-                  {children}
-                </blockquote>
-              ),
-            }}
-          >
-            {content}
-          </ReactMarkdown>
+    <Layout 
+      title={`Course: ${slug} - FHEVM Tutorials`}
+      description={`Learn FHEVM course ${slug}, master privacy computing smart contract development skills`}
+    >
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Course Progress Indicator */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+            <span>Course Progress</span>
+            <span>{currentIndex + 1} / {courseList.length}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${((currentIndex + 1) / courseList.length) * 100}%` }}
+            ></div>
+          </div>
         </div>
-        
-        {/* 导航按钮 */}
-        <div className="mt-8 pt-8 border-t border-gray-200 flex justify-between">
-          <Link 
-            href="/"
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors"
-          >
-            ← 返回首页
-          </Link>
-          <div className="text-sm text-gray-500">
-            课程: {slug}
+
+        {/* Main Content */}
+        <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="p-8 lg:p-12">
+            <div className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-primary-600 prose-strong:text-gray-900 prose-code:text-pink-600 prose-code:bg-pink-50 prose-blockquote:border-primary-500 prose-blockquote:bg-primary-50">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code: ({ node, inline, className, children, ...props }: CodeComponentProps) => {
+                    const codeContent = String(children).replace(/\n$/, '');
+                    
+                    if (!inline) {
+                      return (
+                        <div className="relative my-6 group">
+                          <CopyButton text={codeContent} />
+                          <pre className="bg-gray-900 text-white p-6 rounded-xl overflow-x-auto border border-gray-700">
+                            <code className="text-sm font-mono leading-relaxed">{children}</code>
+                          </pre>
+                        </div>
+                      );
+                    }
+                    return (
+                      <code className="bg-pink-50 text-pink-600 px-2 py-1 rounded-md text-sm font-mono border border-pink-200">
+                        {children}
+                      </code>
+                    );
+                  },
+                  h1: (props: any) => (
+                    <h1 className="text-4xl font-bold text-gray-900 mb-8 pb-4 border-b-2 border-primary-500">
+                      {props.children}
+                    </h1>
+                  ),
+                  h2: (props: any) => (
+                    <h2 className="text-3xl font-semibold text-gray-800 mt-12 mb-6 flex items-center">
+                      <span className="w-1 h-8 bg-gradient-to-b from-primary-500 to-secondary-500 rounded-full mr-4"></span>
+                      {props.children}
+                    </h2>
+                  ),
+                  h3: (props: any) => (
+                    <h3 className="text-2xl font-semibold text-gray-800 mt-8 mb-4">
+                      {props.children}
+                    </h3>
+                  ),
+                  blockquote: (props: any) => (
+                    <blockquote className="border-l-4 border-primary-500 bg-gradient-to-r from-primary-50 to-transparent p-6 my-6 rounded-r-lg">
+                      <div className="flex items-start">
+                        <svg className="w-6 h-6 text-primary-500 mr-3 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                        <div>{props.children}</div>
+                      </div>
+                    </blockquote>
+                  ),
+                  ul: (props: any) => (
+                    <ul className="space-y-2 my-6">{props.children}</ul>
+                  ),
+                  li: (props: any) => (
+                    <li className="flex items-start">
+                      <svg className="w-2 h-2 text-primary-500 mt-3 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 8 8">
+                        <circle cx="4" cy="4" r="4" />
+                      </svg>
+                      <span>{props.children}</span>
+                    </li>
+                  ),
+                }}
+              >
+                {content}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </article>
+
+        {/* Course Navigation */}
+        <div className="mt-12 bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-4">
+              {prevCourse ? (
+                <Link href={`/courses/${prevCourse}`}>
+                  <InteractiveButton variant="outline" size="md">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </InteractiveButton>
+                </Link>
+              ) : (
+                <div></div>
+              )}
+            </div>
+
+            <div className="text-center">
+              <Link href="/">
+                <InteractiveButton variant="ghost" size="sm">
+                  Back to Home
+                </InteractiveButton>
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {nextCourse ? (
+                <Link href={`/courses/${nextCourse}`}>
+                  <InteractiveButton variant="primary" size="md">
+                    Next
+                    <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </InteractiveButton>
+                </Link>
+              ) : (
+                <Link href="/">
+                  <InteractiveButton variant="primary" size="md">
+                    Course Complete 🎉
+                  </InteractiveButton>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Course Info Card */}
+        <div className="mt-8 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-2xl p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Current Course</h3>
+              <p className="text-gray-600">{slug}</p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-primary-600">
+                {Math.round(((currentIndex + 1) / courseList.length) * 100)}%
+              </div>
+              <div className="text-sm text-gray-500">Progress</div>
+            </div>
           </div>
         </div>
       </div>
@@ -173,9 +198,9 @@ export default function CoursePage({ content, slug }: CourseProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const contentDir = path.join(process.cwd(), "public/content/FHEVM-Solidity/beginner");
+  const contentDir = path.join(process.cwd(), "public/content/courses");
   
-  // 检查目录是否存在
+  // Check if directory exists
   if (!fs.existsSync(contentDir)) {
     console.warn(`Directory not found: ${contentDir}`);
     return { paths: [], fallback: false };
@@ -202,15 +227,15 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     return { notFound: true };
   }
 
-  // 尝试在 beginner 目录中查找文件
+  // Try to find file in courses directory
   const filePath = path.join(
     process.cwd(),
-    "public/content/FHEVM-Solidity/beginner",
+    "public/content/courses",
     `${params.slug}.md`
   );
 
   try {
-    // 检查文件是否存在
+    // Check if file exists
     if (!fs.existsSync(filePath)) {
       console.error(`File not found: ${filePath}`);
       return { notFound: true };
